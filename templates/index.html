@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>TikTok Monitor</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #000;
+            color: #fff;
+            text-align: center;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        .stat {
+            background: #111;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .live {
+            background: red !important;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1 }
+            50% { opacity: 0.5 }
+            100% { opacity: 1 }
+        }
+    </style>
+</head>
+<body>
+
+<h1>TikTok Monitor: @{{ target_username }}</h1>
+
+<div class="stats" id="stats"></div>
+
+<p id="last-update">Carregando...</p>
+
+<script>
+async function updateStats() {
+    const res = await fetch("/api/stats");
+    const data = await res.json();
+
+    document.getElementById("stats").innerHTML = `
+        <div class="stat ${data.is_live ? "live" : ""}">
+            <h2>${data.is_live ? "🔴 AO VIVO" : "Offline"}</h2>
+        </div>
+
+        <div class="stat">
+            <h3>Seguidores</h3>
+            <h2>${data.followers.toLocaleString()}</h2>
+        </div>
+
+        <div class="stat">
+            <h3>Seguindo</h3>
+            <h2>${data.following.toLocaleString()}</h2>
+        </div>
+
+        <div class="stat">
+            <h3>Curtidas</h3>
+            <h2>${data.likes.toLocaleString()}</h2>
+        </div>
+
+        <div class="stat">
+            <h3>Vídeos</h3>
+            <h2>${data.videos.toLocaleString()}</h2>
+        </div>
+    `;
+
+    document.getElementById("last-update").innerText =
+        "Última atualização: " + data.last_update;
+}
+
+updateStats();
+setInterval(updateStats, 30000);
+</script>
+
+</body>
+</html>
